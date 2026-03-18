@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
-import { DateSelector } from '../components';
+import { ExpandableWeekCalendar } from '../components';
 import { colors, spacing, borderRadius } from '../theme/colors';
-import { mockSleepData, generateWeekDays, mockWeeklySleeepStats } from '../data/mockData';
+import { mockSleepData, mockWeeklySleeepStats } from '../data/mockData';
 
 interface SleepDetailScreenProps {
   onClose: () => void;
 }
 
 export const SleepDetailScreen: React.FC<SleepDetailScreenProps> = ({ onClose }) => {
-  const [selectedDate, setSelectedDate] = useState(20);
-  const weekDays = generateWeekDays(selectedDate);
+  const [selectedDate, setSelectedDate] = useState('2024-03-20');
   const todaySleep = mockSleepData[mockSleepData.length - 1];
 
   const sleepProgress = ((todaySleep.hours * 60 + todaySleep.minutes) / (mockWeeklySleeepStats.goalHours * 60 + mockWeeklySleeepStats.goalMinutes)) * 100;
@@ -27,24 +26,7 @@ export const SleepDetailScreen: React.FC<SleepDetailScreenProps> = ({ onClose })
           <View style={styles.placeholder} />
         </View>
 
-        {/* Date Selector */}
-        <DateSelector
-          weekDays={weekDays}
-          onSelectDate={setSelectedDate}
-          showBackArrow={true}
-        />
-
-        {/* Date Indicators */}
-        <View style={styles.dateIndicators}>
-          {weekDays.map((day) => (
-            <View key={day.date} style={styles.indicatorContainer}>
-              <View style={[
-                styles.indicator,
-                day.isSelected && styles.indicatorSelected
-              ]} />
-            </View>
-          ))}
-        </View>
+        <ExpandableWeekCalendar selectedDate={selectedDate} onDateChange={setSelectedDate} />
 
         {/* Main Progress Circle */}
         <View style={styles.progressContainer}>
@@ -159,25 +141,6 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     width: 44,
-  },
-  dateIndicators: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: spacing.xl,
-    marginBottom: spacing.lg,
-  },
-  indicatorContainer: {
-    alignItems: 'center',
-  },
-  indicator: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: colors.sleep,
-  },
-  indicatorSelected: {
-    backgroundColor: colors.sleep,
   },
   progressContainer: {
     alignItems: 'center',

@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
-import { DateSelector } from '../components';
+import { ExpandableWeekCalendar } from '../components';
 import { colors, spacing, borderRadius } from '../theme/colors';
-import { mockMoodData, generateWeekDays } from '../data/mockData';
+import { mockMoodData } from '../data/mockData';
 
 interface MoodDetailScreenProps {
   onClose: () => void;
 }
 
 export const MoodDetailScreen: React.FC<MoodDetailScreenProps> = ({ onClose }) => {
-  const [selectedDate, setSelectedDate] = useState(20);
-  const weekDays = generateWeekDays(selectedDate);
+  const [selectedDate, setSelectedDate] = useState('2024-03-20');
 
   const getMoodColor = (level: number) => {
     if (level >= 70) return colors.mood;
@@ -30,15 +29,7 @@ export const MoodDetailScreen: React.FC<MoodDetailScreenProps> = ({ onClose }) =
           <View style={styles.placeholder} />
         </View>
 
-        {/* Date Selector */}
-        <DateSelector
-          weekDays={weekDays}
-          onSelectDate={setSelectedDate}
-          showBackArrow={true}
-        />
-
-        {/* Month Label */}
-        <Text style={styles.monthLabel}>March</Text>
+        <ExpandableWeekCalendar selectedDate={selectedDate} onDateChange={setSelectedDate} />
 
         {/* Mood Circle Visualization */}
         <View style={styles.moodCircleContainer}>
@@ -118,13 +109,6 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     width: 44,
-  },
-  monthLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: colors.textPrimary,
-    textAlign: 'center',
-    marginVertical: spacing.md,
   },
   moodCircleContainer: {
     alignItems: 'center',

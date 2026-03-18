@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
-import { DateSelector } from '../components';
+import { ExpandableWeekCalendar } from '../components';
 import { colors, spacing, borderRadius } from '../theme/colors';
-import { mockCycleData, generateWeekDays } from '../data/mockData';
+import { mockCycleData } from '../data/mockData';
 
 interface CycleDetailScreenProps {
   onClose: () => void;
 }
 
 export const CycleDetailScreen: React.FC<CycleDetailScreenProps> = ({ onClose }) => {
-  const [selectedDate, setSelectedDate] = useState(20);
-  const weekDays = generateWeekDays(selectedDate);
+  const [selectedDate, setSelectedDate] = useState('2024-03-20');
 
   const getPhaseColor = (phase: string) => {
     switch (phase) {
@@ -38,15 +37,7 @@ export const CycleDetailScreen: React.FC<CycleDetailScreenProps> = ({ onClose })
           <View style={styles.placeholder} />
         </View>
 
-        {/* Date Selector */}
-        <DateSelector
-          weekDays={weekDays}
-          onSelectDate={setSelectedDate}
-          showBackArrow={true}
-        />
-
-        {/* Month Label */}
-        <Text style={styles.monthLabel}>March</Text>
+        <ExpandableWeekCalendar selectedDate={selectedDate} onDateChange={setSelectedDate} />
 
         {/* Cycle Progress Circle */}
         <View style={styles.progressContainer}>
@@ -131,13 +122,6 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     width: 44,
-  },
-  monthLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: colors.textPrimary,
-    textAlign: 'center',
-    marginVertical: spacing.md,
   },
   progressContainer: {
     alignItems: 'center',

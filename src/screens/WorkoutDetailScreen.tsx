@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
-import { DateSelector } from '../components';
+import { ExpandableWeekCalendar } from '../components';
 import { colors, spacing, borderRadius } from '../theme/colors';
-import { mockWorkoutData, generateWeekDays } from '../data/mockData';
+import { mockWorkoutData } from '../data/mockData';
 
 interface WorkoutDetailScreenProps {
   onClose: () => void;
 }
 
 export const WorkoutDetailScreen: React.FC<WorkoutDetailScreenProps> = ({ onClose }) => {
-  const [selectedDate, setSelectedDate] = useState(20);
-  const weekDays = generateWeekDays(selectedDate);
+  const [selectedDate, setSelectedDate] = useState('2024-03-20');
 
   const progressPercentage = (mockWorkoutData.caloriesBurned / mockWorkoutData.calorieGoal) * 100;
 
@@ -26,15 +25,7 @@ export const WorkoutDetailScreen: React.FC<WorkoutDetailScreenProps> = ({ onClos
           <View style={styles.placeholder} />
         </View>
 
-        {/* Date Selector */}
-        <DateSelector
-          weekDays={weekDays}
-          onSelectDate={setSelectedDate}
-          showBackArrow={true}
-        />
-
-        {/* Month Label */}
-        <Text style={styles.monthLabel}>March</Text>
+        <ExpandableWeekCalendar selectedDate={selectedDate} onDateChange={setSelectedDate} />
 
         {/* Calorie Progress Circle */}
         <View style={styles.progressContainer}>
@@ -132,13 +123,6 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     width: 44,
-  },
-  monthLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: colors.textPrimary,
-    textAlign: 'center',
-    marginVertical: spacing.md,
   },
   progressContainer: {
     alignItems: 'center',
