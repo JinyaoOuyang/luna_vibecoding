@@ -34,22 +34,25 @@ export default function App() {
     setDetailScreen(null);
   };
 
-  // Render detail screens as modals
-  if (detailScreen === 'sleep') {
-    return <SleepDetailScreen onClose={handleCloseDetail} />;
-  }
-  if (detailScreen === 'mood') {
-    return <MoodDetailScreen onClose={handleCloseDetail} />;
-  }
-  if (detailScreen === 'workout') {
-    return <WorkoutDetailScreen onClose={handleCloseDetail} />;
-  }
-  if (detailScreen === 'cycle') {
-    return <CycleDetailScreen onClose={handleCloseDetail} />;
-  }
+  const handleTabPress = (tab: TabName) => {
+    setDetailScreen(null);
+    setActiveTab(tab);
+  };
 
-  // Main tab-based navigation
   const renderScreen = () => {
+    if (detailScreen === 'sleep') {
+      return <SleepDetailScreen onClose={handleCloseDetail} />;
+    }
+    if (detailScreen === 'mood') {
+      return <MoodDetailScreen onClose={handleCloseDetail} />;
+    }
+    if (detailScreen === 'workout') {
+      return <WorkoutDetailScreen onClose={handleCloseDetail} />;
+    }
+    if (detailScreen === 'cycle') {
+      return <CycleDetailScreen onClose={handleCloseDetail} />;
+    }
+
     switch (activeTab) {
       case 'home':
         return <HomeScreen onNavigate={handleNavigate} />;
@@ -66,7 +69,7 @@ export default function App() {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
       {renderScreen()}
-      <TabBar activeTab={activeTab} onTabPress={setActiveTab} />
+      <TabBar activeTab={activeTab} onTabPress={handleTabPress} />
     </View>
   );
 }

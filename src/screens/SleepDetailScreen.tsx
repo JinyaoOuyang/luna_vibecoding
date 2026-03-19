@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import { ExpandableWeekCalendar } from '../components';
 import { colors, spacing, borderRadius } from '../theme/colors';
 import { mockSleepData, mockWeeklySleeepStats } from '../data/mockData';
@@ -19,11 +19,7 @@ export const SleepDetailScreen: React.FC<SleepDetailScreenProps> = ({ onClose })
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.backButton}>
-            <Text style={styles.backIcon}>‹</Text>
-          </TouchableOpacity>
           <Text style={styles.title}>Sleep</Text>
-          <View style={styles.placeholder} />
         </View>
 
         <ExpandableWeekCalendar selectedDate={selectedDate} onDateChange={setSelectedDate} />
@@ -117,8 +113,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: spacing.lg,
     marginBottom: spacing.md,
@@ -128,19 +122,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '600',
     color: colors.textPrimary,
-  },
-  backButton: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  backIcon: {
-    fontSize: 32,
-    color: colors.textPrimary,
-  },
-  placeholder: {
-    width: 44,
   },
   progressContainer: {
     alignItems: 'center',
