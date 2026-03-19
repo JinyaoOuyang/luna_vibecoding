@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, Modal, TextInput } from 'react-native';
+import Svg, { Circle } from 'react-native-svg';
 import { ExpandableWeekCalendar } from '../components';
 import { colors, spacing, borderRadius } from '../theme/colors';
 import { mockSleepData, mockWeeklySleeepStats } from '../data/mockData';
@@ -10,9 +11,22 @@ interface SleepDetailScreenProps {
 
 export const SleepDetailScreen: React.FC<SleepDetailScreenProps> = ({ onClose }) => {
   const [selectedDate, setSelectedDate] = useState('2024-03-20');
+  const [showGoalModal, setShowGoalModal] = useState(false);
+  const [goalHours, setGoalHours] = useState(mockWeeklySleeepStats.goalHours.toString());
+  const [goalMinutes, setGoalMinutes] = useState(mockWeeklySleeepStats.goalMinutes.toString());
+  
   const todaySleep = mockSleepData[mockSleepData.length - 1];
+  const currentGoalHours = parseInt(goalHours) || 0;
+  const currentGoalMinutes = parseInt(goalMinutes) || 0;
 
-  const sleepProgress = ((todaySleep.hours * 60 + todaySleep.minutes) / (mockWeeklySleeepStats.goalHours * 60 + mockWeeklySleeepStats.goalMinutes)) * 100;
+  const sleepProgress = Math.min(((todaySleep.hours * 60 + todaySleep.minutes) / (currentGoalHours * 60 + currentGoalMinutes)) * 100, 100);
+  
+  // Ring dimensions
+  const ringSize = 200;
+  const strokeWidth = 14;
+  const radius = (ringSize - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const progressStrokeDashoffset = circumference - (circumference * sleepProgress) / 100;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -24,9 +38,36 @@ export const SleepDetailScreen: React.FC<SleepDetailScreenProps> = ({ onClose })
 
         <ExpandableWeekCalendar selectedDate={selectedDate} onDateChange={setSelectedDate} />
 
-        {/* Main Progress Circle */}
-        <View style={styles.progressContainer}>
-          <View style={styles.progressCircle}>
+        {/* Main Progress Circle - Apple-style dual ring */}
+        <TouchableOpacity style={styles.progressContainer} onPress={() => setShowGoalModal(true)} activeOpacity={0.8}>
+          <View style={styles.ringWrapper}>
+            <Svg width={ringSize} height={ringSize}>
+              {/* Background ring (goal - light color, full circle) */}
+              <Circle
+                cx={ringSize / 2}
+                cy={ringSize / 2}
+                r={radius}
+                stroke={colors.sleep}
+                strokeWidth={strokeWidth}
+                fill="none"
+                opacity={0.3}
+              />
+              {/* Progress ring (actual sleep - dark color, partial arc) */}
+              <Circle
+                cx={ringSize / 2}
+                cy={ringSize / 2}
+                r={radius}
+                stroke={colors.sleep}
+                strokeWidth={strokeWidth}
+                fill="none"
+                strokeDasharray={circumference}
+                strokeDashoffset={progressStrokeDashoffset}
+                strokeLinecap="round"
+                rotation="-90"
+                origin={`${ringSize / 2}, ${ringSize / 2}`}
+              />
+            </Svg>
+            {/* Center content */}
             <View style={styles.progressInner}>
               <View style={styles.timeDisplay}>
                 <Text style={styles.timeNumber}>{todaySleep.hours}</Text>
@@ -35,11 +76,57 @@ export const SleepDetailScreen: React.FC<SleepDetailScreenProps> = ({ onClose })
                 <Text style={styles.timeUnit}>min</Text>
               </View>
               <Text style={styles.goalText}>
-                Daily Goal {mockWeeklySleeepStats.goalHours}h{mockWeeklySleeepStats.goalMinutes}m
+                Daily Goal {currentGoalHours}h{currentGoalMinutes}m
               </Text>
             </View>
           </View>
-        </View>
+        </TouchableOpacity>
+
+        {/* Goal Edit Modal */}
+        <Modal
+          visible={showGoalModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowGoalModal(false)}
+        >
+          <TouchableOpacity 
+            style={styles.modalOverlay} 
+            activeOpacity={1} 
+            onPress={() => setShowGoalModal(false)}
+          >
+            <TouchableOpacity activeOpacity={1} style={styles.modalCard}>
+              <Text style={styles.modalTitle}>Set Daily Goal</Text>
+              <View style={styles.goalInputRow}>
+                <View style={styles.goalInputGroup}>
+                  <TextInput
+                    style={styles.goalInput}
+                    value={goalHours}
+                    onChangeText={setGoalHours}
+                    keyboardType="number-pad"
+                    maxLength={2}
+                  />
+                  <Text style={styles.goalInputLabel}>hours</Text>
+                </View>
+                <View style={styles.goalInputGroup}>
+                  <TextInput
+                    style={styles.goalInput}
+                    value={goalMinutes}
+                    onChangeText={setGoalMinutes}
+                    keyboardType="number-pad"
+                    maxLength={2}
+                  />
+                  <Text style={styles.goalInputLabel}>min</Text>
+                </View>
+              </View>
+              <TouchableOpacity 
+                style={styles.modalButton} 
+                onPress={() => setShowGoalModal(false)}
+              >
+                <Text style={styles.modalButtonText}>Save</Text>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </Modal>
 
         {/* Weekly Chart */}
         <View style={styles.chartContainer}>
@@ -127,16 +214,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: spacing.xl,
   },
-  progressCircle: {
+  ringWrapper: {
     width: 200,
     height: 200,
-    borderRadius: 100,
-    borderWidth: 12,
-    borderColor: colors.sleep,
     justifyContent: 'center',
     alignItems: 'center',
   },
   progressInner: {
+    position: 'absolute',
     alignItems: 'center',
   },
   timeDisplay: {
@@ -244,5 +329,66 @@ const styles = StyleSheet.create({
     color: colors.sleep,
     marginLeft: 2,
     marginRight: spacing.xs,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalCard: {
+    backgroundColor: colors.cardBackground,
+    borderRadius: borderRadius.lg,
+    padding: spacing.xl,
+    width: '80%',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: spacing.lg,
+  },
+  goalInputRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.lg,
+    marginBottom: spacing.lg,
+  },
+  goalInputGroup: {
+    alignItems: 'center',
+  },
+  goalInput: {
+    width: 70,
+    height: 50,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    fontSize: 24,
+    fontWeight: '600',
+    textAlign: 'center',
+    color: colors.textPrimary,
+    backgroundColor: colors.background,
+  },
+  goalInputLabel: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+  },
+  modalButton: {
+    backgroundColor: colors.sleep,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xxl,
+    borderRadius: borderRadius.full,
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.cardBackground,
   },
 });
